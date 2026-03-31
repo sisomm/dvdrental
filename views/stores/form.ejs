@@ -1,19 +1,23 @@
 <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
-  <h1 class="bb-page-title" style="margin-bottom:0">✏ Edit Store</h1>
+  <h1 class="bb-page-title" style="margin-bottom:0"><%= store.store_id ? '✏ Edit Store' : '+ New Store' %></h1>
   <a href="/stores" class="btn btn-blue">Cancel</a>
 </div>
 
-<form method="POST" action="<%= action %>">
+<form method="POST" action="<%= action %>" class="bb-form">
   <div class="bb-card">
     <h2>Store Info</h2>
     <div class="bb-form">
       <div class="form-group">
         <label>Manager *</label>
+        <% if (!store.store_id && staff.length === 0) { %>
+          <div class="bb-alert bb-alert-error">No available managers — every staff member already manages a store. Add a new staff member first.</div>
+        <% } else { %>
         <select name="manager_staff_id" required>
           <% staff.forEach(s => { %>
             <option value="<%= s.staff_id %>" <%= store.manager_staff_id == s.staff_id ? 'selected' : '' %>><%= s.name %></option>
           <% }) %>
         </select>
+        <% } %>
       </div>
     </div>
   </div>
@@ -56,7 +60,7 @@
   </div>
 
   <div class="btn-group">
-    <button type="submit" class="btn btn-primary">💾 Save Store</button>
+    <button type="submit" class="btn btn-primary">💾 <%= store.store_id ? 'Save Changes' : 'Open Store' %></button>
     <a href="/stores" class="btn btn-blue">Cancel</a>
   </div>
 </form>

@@ -29,6 +29,44 @@ router.get('/', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+router.get('/new', async (req, res, next) => {
+  try {
+    const [staff, cities] = await Promise.all([
+      db.query('SELECT staff_id, first_name || \' \' || last_name AS name FROM staff WHERE staff_id NOT IN (SELECT manager_staff_id FROM store) ORDER BY last_name'),
+      db.query('SELECT ci.city_id, ci.city, co.country FROM city ci JOIN country co ON ci.country_id = co.country_id ORDER BY co.country, ci.city'),
+    ]);
+    res.render('stores/form', {
+      title: 'New Store',
+      currentPage: 'stores',
+      flash: null,
+      store: {},
+      staff: staff.rows,
+      cities: cities.rows,
+      action: '/stores',
+    });
+  } catch (err) { next(err); }
+});
+
+router.post('/', async (req, res, next) => {
+  try {
+    const { manager_staff_id, address, address2, district, city_id, postal_code, phone } = req.body;
+
+    const addrResult = await db.query(
+      'INSERT INTO address (address, address2, district, city_id, postal_code, phone) VALUES ($1,$2,$3,$4,$5,$6) RETURNING address_id',
+      [address, address2 || null, district, city_id, postal_code || null, phone || '']
+    );
+
+    const storeResult = await db.query(
+      'INSERT INTO store (manager_staff_id, address_id) VALUES ($1,$2) RETURNING store_id',
+      [manager_staff_id, addrResult.rows[0].address_id]
+    );
+
+    await db.query('UPDATE staff SET store_id=$1 WHERE staff_id=$2', [storeResult.rows[0].store_id, manager_staff_id]);
+
+    res.redirect('/stores?flash=Store+created+successfully');
+  } catch (err) { next(err); }
+});
+
 router.get('/:id/edit', async (req, res, next) => {
   try {
     const [store, staff, cities] = await Promise.all([
@@ -58,6 +96,7 @@ router.put('/:id', async (req, res, next) => {
     await db.query('UPDATE address SET address=$1,address2=$2,district=$3,city_id=$4,postal_code=$5,phone=$6 WHERE address_id=$7',
       [address, address2||null, district, city_id, postal_code||null, phone||'', s.rows[0].address_id]);
     await db.query('UPDATE store SET manager_staff_id=$1, last_update=NOW() WHERE store_id=$2', [manager_staff_id, req.params.id]);
+    await db.query('UPDATE staff SET store_id=$1 WHERE staff_id=$2', [req.params.id, manager_staff_id]);
 
     res.redirect('/stores?flash=Store+updated+successfully');
   } catch (err) { next(err); }

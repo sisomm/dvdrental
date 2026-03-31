@@ -200,9 +200,10 @@ router.post('/:id/return', async (req, res, next) => {
 
     if (late_fee && parseFloat(late_fee) > 0) {
       const rental = await db.query('SELECT customer_id FROM rental WHERE rental_id=$1', [req.params.id]);
+      const amount = Math.min(parseFloat(late_fee), 999.99).toFixed(2);
       await db.query(
         'INSERT INTO payment (customer_id, staff_id, rental_id, amount, payment_date) VALUES ($1,$2,$3,$4,NOW())',
-        [rental.rows[0].customer_id, staff_id, req.params.id, late_fee]
+        [rental.rows[0].customer_id, staff_id, req.params.id, amount]
       );
     }
 
