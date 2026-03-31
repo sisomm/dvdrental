@@ -1,0 +1,55 @@
+<h1 class="bb-page-title">📼 Store Dashboard</h1>
+
+<div class="bb-stats">
+  <div class="bb-stat">
+    <div class="bb-stat-number"><%= stats.films %></div>
+    <div class="bb-stat-label">Total Titles</div>
+  </div>
+  <div class="bb-stat">
+    <div class="bb-stat-number"><%= stats.customers %></div>
+    <div class="bb-stat-label">Active Members</div>
+  </div>
+  <div class="bb-stat">
+    <div class="bb-stat-number"><%= stats.openRentals %></div>
+    <div class="bb-stat-label">Out on Rental</div>
+  </div>
+  <div class="bb-stat">
+    <div class="bb-stat-number">$<%= stats.todayRevenue %></div>
+    <div class="bb-stat-label">Today's Revenue</div>
+  </div>
+</div>
+
+<div class="bb-card">
+  <h2>Currently Rented Out</h2>
+  <% if (recentRentals.length === 0) { %>
+    <p class="text-muted">No active rentals right now.</p>
+  <% } else { %>
+  <div class="bb-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Film</th>
+          <th>Customer</th>
+          <th>Rented</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% recentRentals.forEach(r => { %>
+        <tr>
+          <td><a href="/films" class="text-yellow" style="text-decoration:none"><%= r.title %></a></td>
+          <td><%= r.customer %></td>
+          <td><%= new Date(r.rental_date).toLocaleDateString() %></td>
+          <td><a href="/rentals/<%= r.rental_id %>/return" class="btn btn-sm btn-primary">Return</a></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+  <br>
+  <div class="flex">
+    <a href="/rentals/new" class="btn btn-primary">📼 Rent a Film</a>
+    <a href="/rentals" class="btn btn-blue">View All Rentals</a>
+  </div>
+</div>

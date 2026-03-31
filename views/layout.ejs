@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Blockbuster Video' %> | Blockbuster</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="bb-header">
+    <div class="bb-logo-bar">
+      <span class="bb-vhs-icon">📼</span>
+      <div>
+        <div class="bb-logo-text">Blockbuster Video</div>
+        <div class="bb-logo-sub">Be Kind, Rewind &nbsp;|&nbsp; Your Entertainment Destination</div>
+      </div>
+      <span class="bb-vhs-icon">📼</span>
+    </div>
+    <nav class="bb-nav">
+      <a href="/" class="<%= currentPage === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/films" class="<%= currentPage === 'films' ? 'active' : '' %>">Films</a>
+      <a href="/rentals" class="<%= currentPage === 'rentals' ? 'active' : '' %>">Rentals</a>
+      <a href="/customers" class="<%= currentPage === 'customers' ? 'active' : '' %>">Customers</a>
+      <a href="/staff" class="<%= currentPage === 'staff' ? 'active' : '' %>">Staff</a>
+      <a href="/stores" class="<%= currentPage === 'stores' ? 'active' : '' %>">Stores</a>
+      <a href="/cities" class="<%= currentPage === 'cities' ? 'active' : '' %>">Cities</a>
+    </nav>
+    <div class="bb-marquee-bar">
+      <marquee behavior="scroll" direction="left" scrollamount="3">
+        ★ NEW RELEASES EVERY TUESDAY ★ &nbsp;&nbsp; BE KIND, REWIND ★ &nbsp;&nbsp; LATE FEES APPLY AFTER MIDNIGHT ★ &nbsp;&nbsp; MEMBERS GET MORE ★ &nbsp;&nbsp; FREE POPCORN WITH 3-NIGHT RENTAL ★
+      </marquee>
+    </div>
+  </header>
+
+  <main class="bb-main">
+    <% if (typeof flash !== 'undefined' && flash) { %>
+      <div class="bb-alert <%= flash.type === 'error' ? 'bb-alert-error' : '' %>">
+        <%= flash.message %>
+      </div>
+    <% } %>
+    <%- body %>
+  </main>
+
+  <footer class="bb-footer">
+    📼 &nbsp; BLOCKBUSTER VIDEO &nbsp; | &nbsp; EST. 1985 &nbsp; | &nbsp; BE KIND, REWIND &nbsp; 📼
+  </footer>
+</body>
+</html>

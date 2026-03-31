@@ -1,0 +1,40 @@
+<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0">🎫 Staff</h1>
+  <a href="/staff/new" class="btn btn-primary">+ New Staff</a>
+</div>
+
+<div class="bb-table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Store</th>
+        <th>City</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% staff.forEach(s => { %>
+      <tr class="<%= s.active ? '' : 'inactive' %>">
+        <td class="text-yellow"><%= s.last_name %>, <%= s.first_name %></td>
+        <td><code><%= s.username %></code></td>
+        <td><span class="text-muted"><%= s.email || '—' %></span></td>
+        <td><%= s.store_city %></td>
+        <td><%= s.city || '—' %></td>
+        <td><span class="badge <%= s.active ? 'badge-active' : 'badge-inactive' %>"><%= s.active ? 'Active' : 'Inactive' %></span></td>
+        <td>
+          <div class="btn-group">
+            <a href="/staff/<%= s.staff_id %>/edit" class="btn btn-sm btn-blue">Edit</a>
+            <form method="POST" action="/staff/<%= s.staff_id %>?_method=DELETE" style="display:inline" onsubmit="return confirm('Delete this staff member?')">
+              <button type="submit" class="btn btn-sm btn-danger">Del</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>

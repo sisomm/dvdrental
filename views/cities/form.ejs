@@ -1,0 +1,46 @@
+<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0"><%= city.city_id ? '✏ Edit City' : '+ New City' %></h1>
+  <a href="/cities" class="btn btn-blue">Cancel</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+  <div class="bb-card">
+    <h2><%= city.city_id ? 'Edit City' : 'Add City' %></h2>
+    <form method="POST" action="<%= action %>">
+      <div class="bb-form">
+        <div class="form-group">
+          <label>City Name *</label>
+          <input type="text" name="city" value="<%= city.city || '' %>" required>
+        </div>
+        <div class="form-group">
+          <label>Country *</label>
+          <select name="country_id" required>
+            <option value="">Select country...</option>
+            <% countries.forEach(c => { %>
+              <option value="<%= c.country_id %>" <%= city.country_id == c.country_id ? 'selected' : '' %>><%= c.country %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary">💾 Save City</button>
+          <a href="/cities" class="btn btn-blue">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <% if (!city.city_id) { %>
+  <div class="bb-card">
+    <h2>Add New Country</h2>
+    <form method="POST" action="/cities/countries">
+      <div class="bb-form">
+        <div class="form-group">
+          <label>Country Name *</label>
+          <input type="text" name="country" required>
+        </div>
+        <button type="submit" class="btn btn-blue">+ Add Country</button>
+      </div>
+    </form>
+  </div>
+  <% } %>
+</div>

@@ -1,0 +1,52 @@
+<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0">📼 Return Film</h1>
+  <a href="/rentals" class="btn btn-blue">Cancel</a>
+</div>
+
+<div class="bb-card" style="max-width:600px">
+  <h2>Rental #<%= rental.rental_id %></h2>
+
+  <div class="film-meta" style="margin-bottom:20px">
+    <div class="film-meta-row"><span class="film-meta-label">Film</span><strong class="text-yellow"><%= rental.title %></strong></div>
+    <div class="film-meta-row"><span class="film-meta-label">Customer</span><a href="/customers/<%= rental.customer_id %>" style="color:#aac;text-decoration:none"><%= rental.customer %></a></div>
+    <div class="film-meta-row"><span class="film-meta-label">Rented On</span><%= new Date(rental.rental_date).toLocaleDateString() %></div>
+    <div class="film-meta-row"><span class="film-meta-label">Due Back</span>
+      <%= new Date(new Date(rental.rental_date).getTime() + rental.rental_duration * 86400000).toLocaleDateString() %>
+    </div>
+    <div class="film-meta-row"><span class="film-meta-label">Days Out</span>
+      <% const isLate = daysLate > 0; %>
+      <span style="color:<%= isLate ? '#ff6666' : '#aaa' %>"><%= rental.days_out %> days<%= isLate ? ` (${daysLate} day${daysLate > 1 ? 's' : ''} LATE)` : '' %></span>
+    </div>
+    <div class="film-meta-row"><span class="film-meta-label">Already Paid</span>$<%= rental.paid ? parseFloat(rental.paid).toFixed(2) : '0.00' %></div>
+  </div>
+
+  <hr class="divider">
+
+  <form method="POST" action="/rentals/<%= rental.rental_id %>/return">
+    <div class="bb-form" style="max-width:400px">
+      <% if (isLate) { %>
+      <div class="bb-alert bb-alert-error">
+        ⚠ This rental is <%= daysLate %> day<%= daysLate > 1 ? 's' : '' %> late. Late fee: $<%= lateFee %>
+      </div>
+      <div class="form-group">
+        <label>Late Fee to Charge ($)</label>
+        <input type="number" name="late_fee" value="<%= lateFee %>" step="0.01" min="0">
+      </div>
+      <% } else { %>
+      <input type="hidden" name="late_fee" value="0">
+      <div class="bb-alert">No late fee — returned on time.</div>
+      <% } %>
+
+      <div class="form-group">
+        <label>Processed By (Staff)</label>
+        <select name="staff_id" required>
+          <% staffList.forEach(s => { %>
+            <option value="<%= s.staff_id %>"><%= s.name %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="font-size:1.2rem;padding:10px 24px">✓ Process Return</button>
+    </div>
+  </form>
+</div>

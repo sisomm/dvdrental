@@ -1,0 +1,140 @@
+<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0">📼 New Rental</h1>
+  <a href="/rentals" class="btn btn-blue">Cancel</a>
+</div>
+
+<div class="rental-step">
+  <div class="rental-step-header">Step 1 — Select Store & Customer</div>
+  <form method="GET" action="/rentals/new" id="step1-form">
+    <div class="bb-form-row" style="max-width:700px">
+      <div class="form-group">
+        <label>Store</label>
+        <select name="store_id" id="store-select">
+          <option value="">Select store...</option>
+          <% stores.forEach(s => { %>
+            <option value="<%= s.store_id %>" <%= query.store_id == s.store_id ? 'selected' : '' %>><%= s.city %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Customer</label>
+        <input type="text" id="customer-search-input" placeholder="Type to filter..." value="<%= customer ? customer.name : '' %>">
+        <select name="customer_id" id="customer-select" size="5" style="height:auto;margin-top:4px">
+          <option value="">Select customer...</option>
+          <% customers.forEach(c => { %>
+            <option value="<%= c.customer_id %>" <%= query.customer_id == c.customer_id ? 'selected' : '' %>><%= c.name %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="rental-step">
+  <div class="rental-step-header">Step 2 — Find Film</div>
+  <div class="bb-search">
+    <input type="text" id="film-search" placeholder="Search film title..." autocomplete="off">
+  </div>
+  <div id="film-results" style="max-height:260px;overflow-y:auto"></div>
+  <input type="hidden" id="selected-film-id" value="<%= query.film_id || '' %>">
+  <input type="hidden" id="selected-film-title" value="<%= film ? film.title : '' %>">
+  <input type="hidden" id="selected-film-rate" value="<%= film ? film.rental_rate : '' %>">
+  <input type="hidden" id="selected-film-duration" value="<%= film ? film.rental_duration : '' %>">
+  <% if (film) { %>
+  <div id="selected-film-display" class="bb-alert">
+    Selected: <strong><%= film.title %></strong> — $<%= film.rental_rate %> / <%= film.rental_duration %> days
+  </div>
+  <% } else { %>
+  <div id="selected-film-display" style="display:none" class="bb-alert"></div>
+  <% } %>
+</div>
+
+<div class="rental-step" id="checkout-section" style="<%= (film && query.customer_id && query.store_id) ? '' : 'display:none' %>">
+  <div class="rental-step-header">Step 3 — Confirm & Checkout</div>
+  <% if (availableInventory.length > 0) { %>
+  <form method="POST" action="/rentals">
+    <input type="hidden" name="customer_id" id="form-customer-id" value="<%= query.customer_id || '' %>">
+    <input type="hidden" name="inventory_id" id="form-inventory-id" value="<%= availableInventory[0].inventory_id %>">
+    <input type="hidden" name="amount" id="form-amount" value="<%= film ? film.rental_rate : '' %>">
+    <div class="form-group" style="max-width:300px">
+      <label>Processed By (Staff)</label>
+      <select name="staff_id" required>
+        <% staffList.filter(s => !query.store_id || s.store_id == query.store_id).forEach(s => { %>
+          <option value="<%= s.staff_id %>"><%= s.name %></option>
+        <% }) %>
+      </select>
+    </div>
+    <br>
+    <div class="bb-alert" style="margin-bottom:16px">
+      <strong>Summary:</strong><br>
+      Customer: <span id="confirm-customer"><%= customer ? customer.name : '' %></span><br>
+      Film: <span id="confirm-film"><%= film ? film.title : '' %></span><br>
+      Charge: $<span id="confirm-amount"><%= film ? film.rental_rate : '' %></span> for <%= film ? film.rental_duration : '' %> days
+    </div>
+    <button type="submit" class="btn btn-primary" style="font-size:1.3rem;padding:10px 28px">📼 Complete Rental</button>
+  </form>
+  <% } else if (film && query.store_id) { %>
+  <div class="bb-alert bb-alert-error">No copies of this film available at <%= stores.find(s => s.store_id == query.store_id)?.city || 'the selected store' %>.</div>
+  <% } %>
+</div>
+
+<script>
+// Customer filter
+document.getElementById('customer-search-input').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('#customer-select option').forEach(opt => {
+    opt.style.display = opt.value === '' || opt.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+
+// Film search
+let filmSearchTimeout;
+document.getElementById('film-search').addEventListener('input', function() {
+  clearTimeout(filmSearchTimeout);
+  const q = this.value;
+  if (q.length < 2) { document.getElementById('film-results').innerHTML = ''; return; }
+  filmSearchTimeout = setTimeout(async () => {
+    const storeId = document.getElementById('store-select').value;
+    const res = await fetch(`/rentals/search-films?q=${encodeURIComponent(q)}&store_id=${storeId}`);
+    const films = await res.json();
+    const html = films.map(f => `
+      <div class="film-result" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center"
+           data-id="${f.film_id}" data-title="${f.title}" data-rate="${f.rental_rate}" data-duration="${f.rental_duration}"
+           onmouseover="this.style.background='rgba(0,48,135,0.4)'" onmouseout="this.style.background=''">
+        <span>${f.title}</span>
+        <span style="color:#aaa;font-size:0.85rem">${f.available} avail &nbsp;|&nbsp; $${parseFloat(f.rental_rate).toFixed(2)}</span>
+      </div>
+    `).join('') || '<div style="padding:12px;color:#777">No films found.</div>';
+    document.getElementById('film-results').innerHTML = html;
+    document.querySelectorAll('.film-result').forEach(el => {
+      el.addEventListener('click', () => selectFilm(el.dataset.id, el.dataset.title, el.dataset.rate, el.dataset.duration));
+    });
+  }, 300);
+});
+
+function selectFilm(id, title, rate, duration) {
+  document.getElementById('selected-film-id').value = id;
+  document.getElementById('selected-film-title').value = title;
+  document.getElementById('selected-film-rate').value = rate;
+  document.getElementById('selected-film-duration').value = duration;
+  document.getElementById('film-results').innerHTML = '';
+  document.getElementById('film-search').value = title;
+  const disp = document.getElementById('selected-film-display');
+  disp.style.display = '';
+  disp.innerHTML = `Selected: <strong>${title}</strong> — $${parseFloat(rate).toFixed(2)} / ${duration} days`;
+  checkReadyForCheckout();
+}
+
+function checkReadyForCheckout() {
+  const filmId = document.getElementById('selected-film-id').value;
+  const customerId = document.getElementById('customer-select').value;
+  const storeId = document.getElementById('store-select').value;
+  if (filmId && customerId && storeId) {
+    const params = new URLSearchParams({ film_id: filmId, customer_id: customerId, store_id: storeId });
+    window.location.href = '/rentals/new?' + params.toString();
+  }
+}
+
+document.getElementById('customer-select').addEventListener('change', checkReadyForCheckout);
+document.getElementById('store-select').addEventListener('change', checkReadyForCheckout);
+</script>

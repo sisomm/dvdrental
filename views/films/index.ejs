@@ -1,0 +1,76 @@
+<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0">🎬 Film Catalog</h1>
+  <a href="/films/new" class="btn btn-primary">+ Add Film</a>
+</div>
+
+<form method="GET" action="/films">
+  <div class="bb-search">
+    <input type="text" name="search" placeholder="Search titles..." value="<%= query.search || '' %>">
+    <select name="category">
+      <option value="">All Categories</option>
+      <% categories.forEach(c => { %>
+        <option value="<%= c.category_id %>" <%= query.category == c.category_id ? 'selected' : '' %>><%= c.name %></option>
+      <% }) %>
+    </select>
+    <select name="rating">
+      <option value="">All Ratings</option>
+      <% ['G','PG','PG-13','R','NC-17'].forEach(r => { %>
+        <option value="<%= r %>" <%= query.rating === r ? 'selected' : '' %>><%= r %></option>
+      <% }) %>
+    </select>
+    <button type="submit" class="btn btn-blue">Search</button>
+    <a href="/films" class="btn btn-blue">Clear</a>
+  </div>
+</form>
+
+<div class="bb-table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Rating</th>
+        <th>Categories</th>
+        <th>Length</th>
+        <th>Rate</th>
+        <th>Copies</th>
+        <th>Available</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% films.forEach(f => { %>
+      <tr>
+        <td><a href="/films/<%= f.film_id %>" class="text-yellow" style="text-decoration:none"><%= f.title %></a></td>
+        <td><span class="badge badge-<%= f.rating.toLowerCase().replace('-','') %>"><%= f.rating %></span></td>
+        <td><span class="text-muted"><%= f.categories || '—' %></span></td>
+        <td><%= f.length ? f.length + ' min' : '—' %></td>
+        <td>$<%= parseFloat(f.rental_rate).toFixed(2) %></td>
+        <td><%= f.copies %></td>
+        <td>
+          <% const available = f.copies - f.rented_out; %>
+          <span class="badge <%= available > 0 ? 'badge-available' : 'badge-out' %>">
+            <%= available > 0 ? available + ' in' : 'OUT' %>
+          </span>
+        </td>
+        <td>
+          <div class="btn-group">
+            <a href="/films/<%= f.film_id %>/edit" class="btn btn-sm btn-blue">Edit</a>
+            <form method="POST" action="/films/<%= f.film_id %>?_method=DELETE" style="display:inline" onsubmit="return confirm('Delete this film?')">
+              <button type="submit" class="btn btn-sm btn-danger">Del</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<% if (totalPages > 1) { %>
+<div class="bb-pagination">
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <% const q = new URLSearchParams({...query, page: i}).toString(); %>
+    <a href="/films?<%= q %>" class="<%= i === page ? 'current' : '' %>"><%= i %></a>
+  <% } %>
+</div>
+<% } %>

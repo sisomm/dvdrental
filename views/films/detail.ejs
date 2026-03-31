@@ -1,0 +1,98 @@
+<div class="flex" style="justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0">🎬 <%= film.title %></h1>
+  <div class="btn-group">
+    <a href="/films/<%= film.film_id %>/edit" class="btn btn-blue">Edit</a>
+    <form method="POST" action="/films/<%= film.film_id %>?_method=DELETE" onsubmit="return confirm('Delete this film?')">
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+    <a href="/films" class="btn btn-blue">Back</a>
+  </div>
+</div>
+
+<div class="film-detail-grid">
+  <div class="bb-card">
+    <h2>Film Info</h2>
+    <div class="film-meta">
+      <div class="film-meta-row"><span class="film-meta-label">Rating</span>
+        <span class="badge badge-<%= film.rating.toLowerCase().replace('-','') %>"><%= film.rating %></span>
+      </div>
+      <div class="film-meta-row"><span class="film-meta-label">Language</span><span><%= film.language_name %></span></div>
+      <div class="film-meta-row"><span class="film-meta-label">Release Year</span><span><%= film.release_year || '—' %></span></div>
+      <div class="film-meta-row"><span class="film-meta-label">Length</span><span><%= film.length ? film.length + ' min' : '—' %></span></div>
+      <div class="film-meta-row"><span class="film-meta-label">Rental Rate</span><span>$<%= parseFloat(film.rental_rate).toFixed(2) %> / <%= film.rental_duration %> days</span></div>
+      <div class="film-meta-row"><span class="film-meta-label">Replacement</span><span>$<%= parseFloat(film.replacement_cost).toFixed(2) %></span></div>
+      <% if (film.special_features && film.special_features.length) { %>
+      <div class="film-meta-row"><span class="film-meta-label">Special Features</span>
+        <span><%= (film.special_features || []).join(', ') %></span>
+      </div>
+      <% } %>
+      <hr class="divider">
+      <div class="film-meta-row">
+        <span class="film-meta-label">Availability</span>
+        <span class="badge <%= (availability.total - availability.rented) > 0 ? 'badge-available' : 'badge-out' %>">
+          <%= availability.total - availability.rented %> / <%= availability.total %> in store
+        </span>
+      </div>
+    </div>
+    <% if (film.description) { %>
+    <hr class="divider">
+    <p class="text-muted" style="line-height:1.6"><%= film.description %></p>
+    <% } %>
+    <br>
+    <a href="/rentals/new?film_id=<%= film.film_id %>" class="btn btn-primary">📼 Rent This Film</a>
+  </div>
+
+  <div>
+    <div class="bb-card">
+      <h2>Categories</h2>
+      <% if (categories.length) { %>
+        <% categories.forEach(c => { %><span class="tag"><%= c.name %></span><% }) %>
+      <% } else { %><span class="text-muted">None assigned</span><% } %>
+    </div>
+
+    <div class="bb-card">
+      <h2>Cast</h2>
+      <% if (actors.length) { %>
+        <% actors.forEach(a => { %>
+          <span class="tag"><%= a.name %></span>
+        <% }) %>
+      <% } else { %><span class="text-muted">No cast assigned</span><% } %>
+    </div>
+
+    <div class="bb-card">
+      <h2>📦 Store Copies</h2>
+      <% if (inventory.length === 0) { %>
+        <p class="text-muted">No copies in any store yet.</p>
+      <% } else { %>
+        <% const storeMap = {}; stores.forEach(s => { storeMap[s.store_id] = s.city; }); const byStore = {}; stores.forEach(s => { byStore[s.store_id] = []; }); inventory.forEach(i => { if (!byStore[i.store_id]) byStore[i.store_id] = []; byStore[i.store_id].push(i); }); %>
+        <% Object.entries(byStore).forEach(([storeId, copies]) => { if (!copies.length) return; %>
+          <div style="margin-bottom:10px">
+            <strong><%= storeMap[storeId] || 'Store ' + storeId %></strong>
+            <% copies.forEach(copy => { %>
+              <div class="flex" style="align-items:center;gap:8px;margin-top:4px">
+                <span class="badge <%= copy.is_rented ? 'badge-out' : 'badge-available' %>" style="font-size:0.75em">
+                  #<%= copy.inventory_id %> — <%= copy.is_rented ? 'Rented' : 'Available' %>
+                </span>
+                <% if (!copy.is_rented) { %>
+                  <form method="POST" action="/films/<%= film.film_id %>/inventory/<%= copy.inventory_id %>?_method=DELETE"
+                        onsubmit="return confirm('Remove this copy?')" style="margin:0">
+                    <button type="submit" class="btn btn-danger" style="padding:2px 8px;font-size:0.75em">Remove</button>
+                  </form>
+                <% } %>
+              </div>
+            <% }) %>
+          </div>
+        <% }) %>
+      <% } %>
+
+      <hr class="divider">
+      <form method="POST" action="/films/<%= film.film_id %>/inventory" class="flex" style="gap:8px;align-items:center;flex-wrap:wrap">
+        <label style="font-weight:bold;font-size:0.85em">Add copy to store:</label>
+        <select name="store_id" class="form-control" style="width:auto">
+          <% stores.forEach(s => { %><option value="<%= s.store_id %>"><%= s.city %></option><% }) %>
+        </select>
+        <button type="submit" class="btn btn-primary" style="padding:6px 14px">+ Add Copy</button>
+      </form>
+    </div>
+  </div>
+</div>

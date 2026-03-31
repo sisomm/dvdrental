@@ -1,0 +1,64 @@
+<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0">📼 Open Rentals</h1>
+  <a href="/rentals/new" class="btn btn-primary">+ Rent a Film</a>
+</div>
+
+<form method="GET" action="/rentals">
+  <div class="bb-search">
+    <input type="text" name="search" placeholder="Search customer or film..." value="<%= query.search || '' %>">
+    <select name="store">
+      <option value="">All Stores</option>
+      <% stores.forEach(s => { %>
+        <option value="<%= s.store_id %>" <%= query.store == s.store_id ? 'selected' : '' %>><%= s.city %></option>
+      <% }) %>
+    </select>
+    <button type="submit" class="btn btn-blue">Search</button>
+    <a href="/rentals" class="btn btn-blue">Clear</a>
+  </div>
+</form>
+
+<div class="bb-table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Film</th>
+        <th>Customer</th>
+        <th>Store</th>
+        <th>Rented</th>
+        <th>Days Out</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% rentals.forEach(r => { %>
+      <tr>
+        <td class="text-muted"><%= r.rental_id %></td>
+        <td><a href="/films/<%= r.film_id %>" class="text-yellow" style="text-decoration:none"><%= r.title %></a></td>
+        <td><a href="/customers/<%= r.customer_id %>" style="color:#aac;text-decoration:none"><%= r.customer %></a></td>
+        <td><%= r.store_city %></td>
+        <td><%= new Date(r.rental_date).toLocaleDateString() %></td>
+        <td>
+          <% const late = r.days_out > r.rental_duration; %>
+          <span style="color:<%= late ? '#ff6666' : '#aaa' %>"><%= r.days_out %> days<%= late ? ' ⚠ LATE' : '' %></span>
+        </td>
+        <td><span class="badge badge-out">OUT</span></td>
+        <td><a href="/rentals/<%= r.rental_id %>/return" class="btn btn-sm btn-primary">Return</a></td>
+      </tr>
+      <% }) %>
+      <% if (rentals.length === 0) { %>
+      <tr><td colspan="8" style="text-align:center;padding:24px" class="text-muted">No open rentals.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<% if (totalPages > 1) { %>
+<div class="bb-pagination">
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <% const q = new URLSearchParams({...query, page: i}).toString(); %>
+    <a href="/rentals?<%= q %>" class="<%= i === page ? 'current' : '' %>"><%= i %></a>
+  <% } %>
+</div>
+<% } %>

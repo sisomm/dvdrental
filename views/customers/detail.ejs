@@ -1,0 +1,64 @@
+<div class="flex" style="justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0">👤 <%= customer.first_name %> <%= customer.last_name %></h1>
+  <div class="btn-group">
+    <a href="/customers/<%= customer.customer_id %>/edit" class="btn btn-blue">Edit</a>
+    <a href="/rentals/new?customer_id=<%= customer.customer_id %>" class="btn btn-primary">📼 New Rental</a>
+    <a href="/customers" class="btn btn-blue">Back</a>
+  </div>
+</div>
+
+<div class="film-detail-grid">
+  <div class="bb-card">
+    <h2>Member Info</h2>
+    <div class="film-meta">
+      <div class="film-meta-row"><span class="film-meta-label">Email</span><span><%= customer.email || '—' %></span></div>
+      <div class="film-meta-row"><span class="film-meta-label">Store</span><span><%= customer.store_city %></span></div>
+      <div class="film-meta-row"><span class="film-meta-label">Status</span>
+        <span class="badge <%= customer.activebool ? 'badge-active' : 'badge-inactive' %>"><%= customer.activebool ? 'Active' : 'Inactive' %></span>
+      </div>
+      <div class="film-meta-row"><span class="film-meta-label">Member Since</span><span><%= new Date(customer.create_date).toLocaleDateString() %></span></div>
+      <hr class="divider">
+      <div class="film-meta-row"><span class="film-meta-label">Address</span><span><%= customer.address %><%= customer.address2 ? ', ' + customer.address2 : '' %></span></div>
+      <div class="film-meta-row"><span class="film-meta-label">District</span><span><%= customer.district %></span></div>
+      <div class="film-meta-row"><span class="film-meta-label">City</span><span><%= customer.city %>, <%= customer.country %></span></div>
+      <div class="film-meta-row"><span class="film-meta-label">Postal Code</span><span><%= customer.postal_code || '—' %></span></div>
+      <div class="film-meta-row"><span class="film-meta-label">Phone</span><span><%= customer.phone || '—' %></span></div>
+    </div>
+  </div>
+
+  <div class="bb-card">
+    <h2>Rental History (<%= rentals.length %>)</h2>
+    <% if (rentals.length === 0) { %>
+      <p class="text-muted">No rentals yet.</p>
+    <% } else { %>
+    <div class="bb-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Film</th><th>Rented</th><th>Returned</th><th>Paid</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% rentals.forEach(r => { %>
+          <tr>
+            <td><%= r.title %></td>
+            <td><%= new Date(r.rental_date).toLocaleDateString() %></td>
+            <td>
+              <% if (r.return_date) { %>
+                <%= new Date(r.return_date).toLocaleDateString() %>
+              <% } else { %>
+                <span class="badge badge-out">OUT</span>
+              <% } %>
+            </td>
+            <td><%= r.amount ? '$' + parseFloat(r.amount).toFixed(2) : '—' %></td>
+            <td>
+              <% if (!r.return_date) { %>
+                <a href="/rentals/<%= r.rental_id %>/return" class="btn btn-sm btn-primary">Return</a>
+              <% } %>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+</div>

@@ -1,0 +1,55 @@
+<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0">🌍 Cities</h1>
+  <a href="/cities/new" class="btn btn-primary">+ Add City</a>
+</div>
+
+<form method="GET" action="/cities">
+  <div class="bb-search">
+    <input type="text" name="search" placeholder="Search city..." value="<%= query.search || '' %>">
+    <select name="country">
+      <option value="">All Countries</option>
+      <% countries.forEach(c => { %>
+        <option value="<%= c.country_id %>" <%= query.country == c.country_id ? 'selected' : '' %>><%= c.country %></option>
+      <% }) %>
+    </select>
+    <button type="submit" class="btn btn-blue">Search</button>
+    <a href="/cities" class="btn btn-blue">Clear</a>
+  </div>
+</form>
+
+<div class="bb-table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>City</th>
+        <th>Country</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% cities.forEach(c => { %>
+      <tr>
+        <td><%= c.city %></td>
+        <td><%= c.country %></td>
+        <td>
+          <div class="btn-group">
+            <a href="/cities/<%= c.city_id %>/edit" class="btn btn-sm btn-blue">Edit</a>
+            <form method="POST" action="/cities/<%= c.city_id %>?_method=DELETE" style="display:inline" onsubmit="return confirm('Delete this city?')">
+              <button type="submit" class="btn btn-sm btn-danger">Del</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<% if (totalPages > 1) { %>
+<div class="bb-pagination">
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <% const q = new URLSearchParams({...query, page: i}).toString(); %>
+    <a href="/cities?<%= q %>" class="<%= i === page ? 'current' : '' %>"><%= i %></a>
+  <% } %>
+</div>
+<% } %>

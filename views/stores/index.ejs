@@ -1,0 +1,32 @@
+<h1 class="bb-page-title">🏪 Stores</h1>
+
+<div class="bb-table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Store</th>
+        <th>Manager</th>
+        <th>Address</th>
+        <th>City</th>
+        <th>Members</th>
+        <th>Inventory</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% stores.forEach(s => { %>
+      <tr>
+        <td class="text-yellow"><%= s.city %></td>
+        <td><%= s.manager %></td>
+        <td><%= s.address %></td>
+        <td><%= s.city %>, <%= s.country %></td>
+        <td><%= s.customers %></td>
+        <td><%= s.inventory %> titles</td>
+        <td>
+          <a href="/stores/<%= s.store_id %>/edit" class="btn btn-sm btn-blue">Edit</a>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
