@@ -18,6 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', require('./routes/dashboard'));
 app.use('/films', require('./routes/films'));
+app.use('/actors', require('./routes/actors'));
 app.use('/customers', require('./routes/customers'));
 app.use('/rentals', require('./routes/rentals'));
 app.use('/staff', require('./routes/staff'));

@@ -1,0 +1,28 @@
+<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0"><%= actor.actor_id ? '✏ Edit Actor' : '+ New Actor' %></h1>
+  <a href="/actors" class="btn btn-blue">Cancel</a>
+</div>
+
+<form method="POST" action="<%= action %>">
+  <div class="bb-card" style="max-width:500px">
+    <h2>Actor Info</h2>
+    <div class="bb-form">
+      <div class="bb-form-row">
+        <div class="form-group">
+          <label>First Name *</label>
+          <input type="text" name="first_name" value="<%= actor.first_name || '' %>" required autofocus>
+        </div>
+        <div class="form-group">
+          <label>Last Name *</label>
+          <input type="text" name="last_name" value="<%= actor.last_name || '' %>" required>
+        </div>
+      </div>
+      <p class="text-muted" style="font-size:0.85em">Names are stored in uppercase per industry convention.</p>
+    </div>
+  </div>
+
+  <div class="btn-group" style="margin-top:16px">
+    <button type="submit" class="btn btn-primary">💾 <%= actor.actor_id ? 'Save Changes' : 'Add Actor' %></button>
+    <a href="/actors" class="btn btn-blue">Cancel</a>
+  </div>
+</form>

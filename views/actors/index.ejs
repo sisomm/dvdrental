@@ -1,0 +1,53 @@
+<div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:20px">
+  <h1 class="bb-page-title" style="margin-bottom:0">🎭 Actors</h1>
+  <a href="/actors/new" class="btn btn-primary">+ New Actor</a>
+</div>
+
+<form method="GET" action="/actors">
+  <div class="bb-search">
+    <input type="text" name="search" placeholder="Search by name..." value="<%= query.search || '' %>">
+    <button type="submit" class="btn btn-blue">Search</button>
+    <a href="/actors" class="btn btn-blue">Clear</a>
+  </div>
+</form>
+
+<div class="bb-table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Films</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% actors.forEach(a => { %>
+      <tr>
+        <td class="text-yellow"><%= a.last_name %>, <%= a.first_name %></td>
+        <td><%= a.film_count %></td>
+        <td>
+          <div class="btn-group">
+            <a href="/actors/<%= a.actor_id %>/edit" class="btn btn-sm btn-blue">Edit</a>
+            <form method="POST" action="/actors/<%= a.actor_id %>?_method=DELETE" style="display:inline"
+                  onsubmit="return confirm('Delete <%= a.first_name %> <%= a.last_name %>?')">
+              <button type="submit" class="btn btn-sm btn-danger">Del</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      <% }) %>
+      <% if (actors.length === 0) { %>
+      <tr><td colspan="3" style="text-align:center;padding:24px" class="text-muted">No actors found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<% if (totalPages > 1) { %>
+<div class="bb-pagination">
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <% const q = new URLSearchParams({...query, page: i}).toString(); %>
+    <a href="/actors?<%= q %>" class="<%= i === page ? 'current' : '' %>"><%= i %></a>
+  <% } %>
+</div>
+<% } %>
